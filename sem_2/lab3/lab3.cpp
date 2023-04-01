@@ -6,13 +6,7 @@ private:
 	double re, im; // действительная и мнимая части
 
 public:
-	// конструкторы 
-
-	Complex()
-	{
-		re = 0.0;
-		im = 0.0;
-	};
+	// конструкторы
 
 	Complex(double r, double i)
 	{
