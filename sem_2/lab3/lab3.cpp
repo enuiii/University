@@ -7,6 +7,12 @@ private:
 
 public:
 	// конструкторы
+	
+	 Complex() // базовый конструктор по умолчанию
+  	{
+    		re = 0;
+    		im = 0;
+  	}
 
 	Complex(double r, double i)
 	{
