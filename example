@@ -1,0 +1,143 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+def solve_collision_with_stop(mass1, mass2, velocity1, velocity2, which_stops):
+    """
+    Решает задачу о частично упругом столкновении с остановкой одного из шаров.
+    """
+    if which_stops == 'first':
+        # Первый шар останавливается (v1' = 0)
+        v2_prime = (mass1 * velocity1 + mass2 * velocity2) / mass2
+        e = v2_prime / (velocity1 - velocity2) if velocity1 != velocity2 else 0
+        return 0, v2_prime, e
+    
+    elif which_stops == 'second':
+        # Второй шар останавливается (v2' = 0)
+        v1_prime = (mass1 * velocity1 + mass2 * velocity2) / mass1
+        e = -v1_prime / (velocity1 - velocity2) if velocity1 != velocity2 else 0
+        return v1_prime, 0, e
+
+def calculate_energies(mass1, mass2, vel1, vel2, vel1_prime, vel2_prime):
+    """Вычисляет энергии до и после столкновения"""
+    E_initial = 0.5 * mass1 * vel1**2 + 0.5 * mass2 * vel2**2
+    E_final = 0.5 * mass1 * vel1_prime**2 + 0.5 * mass2 * vel2_prime**2
+    return E_initial, E_final
+
+def plot_energy_vs_mass_ratio(velocity1=10, velocity2=0):
+    """
+    Строит график зависимости энергий от отношения масс k = m1/m2
+    """
+    k_values = np.linspace(0.01, 1, 100)
+    mass2_fixed = 1.0
+    
+    E_initial_values = []
+    E_final_values = []
+    delta_E_values = []
+    e_values = []
+    
+    for k in k_values:
+        mass1 = k * mass2_fixed
+        v1_prime, v2_prime, e_coef = solve_collision_with_stop(mass1, mass2_fixed, velocity1, velocity2, 'first')
+        E_i, E_f = calculate_energies(mass1, mass2_fixed, velocity1, velocity2, v1_prime, v2_prime)
+        
+        E_initial_values.append(E_i)
+        E_final_values.append(E_f)
+        delta_E_values.append(E_i - E_f)
+        e_values.append(e_coef)
+    
+    # Построение графиков
+    plt.figure(figsize=(12, 8))
+    
+    plt.subplot(2, 1, 1)
+    plt.plot(k_values, E_initial_values, 'r-', linewidth=2, label='Начальная энергия $E_i$')
+    plt.plot(k_values, E_final_values, 'b-', linewidth=2, label='Конечная энергия $E_f$')
+    plt.plot(k_values, delta_E_values, 'g-', linewidth=2, label='Потеря энергии $ΔE$')
+    plt.xlabel('Отношение масс $k = m_1/m_2$')
+    plt.ylabel('Энергия')
+    plt.title('Зависимость энергий от отношения масс ($v_2 = 0$, останавливается первый шар)')
+    plt.legend()
+    plt.grid(True, alpha=0.3)
+    
+    plt.subplot(2, 1, 2)
+    plt.plot(k_values, e_values, 'purple', linewidth=2)
+    plt.xlabel('Отношение масс $k = m_1/m_2$')
+    plt.ylabel('Коэффициент восстановления $e$')
+    plt.title('Зависимость коэффициента восстановления от отношения масс')
+    plt.grid(True, alpha=0.3)
+    
+    plt.tight_layout()
+    plt.show()
+    
+    # Возвращаем данные для анализа
+    return k_values, E_initial_values, E_final_values, delta_E_values, e_values
+
+def main():
+    """Основная функция с выводом результатов"""
+    print("Решение задачи о частично упругом столкновении с остановкой одного из шаров")
+    print("=" * 70)
+    
+    # Пример 1: Классический случай - второй шар покоится
+    mass1, mass2 = 1, 3
+    vel1, vel2 = 10, 0
+    stop_condition = 'first'
+    
+    print(f"\nПример 1:")
+    print(f"Массы: m1 = {mass1} кг, m2 = {mass2} кг")
+    print(f"Скорости до: v1 = {vel1} м/с, v2 = {vel2} м/с")
+    
+    v1_prime, v2_prime, e_coef = solve_collision_with_stop(mass1, mass2, vel1, vel2, stop_condition)
+    E_i, E_f = calculate_energies(mass1, mass2, vel1, vel2, v1_prime, v2_prime)
+    
+    print(f"Скорости после: v1' = {v1_prime:.2f} м/с, v2' = {v2_prime:.2f} м/с")
+    print(f"Коэффициент восстановления: e = {e_coef:.3f}")
+    print(f"Энергия до: {E_i:.2f} Дж, после: {E_f:.2f} Дж, потеря: {E_i - E_f:.2f} Дж")
+    
+    # Пример 2: Оба шара движутся
+    mass1, mass2 = 2, 5
+    vel1, vel2 = 8, -3
+    stop_condition = 'second'
+    
+    print(f"\nПример 2:")
+    print(f"Массы: m1 = {mass1} кг, m2 = {mass2} кг")
+    print(f"Скорости до: v1 = {vel1} м/с, v2 = {vel2} м/с")
+    
+    v1_prime, v2_prime, e_coef = solve_collision_with_stop(mass1, mass2, vel1, vel2, stop_condition)
+    E_i, E_f = calculate_energies(mass1, mass2, vel1, vel2, v1_prime, v2_prime)
+    
+    print(f"Скорости после: v1' = {v1_prime:.2f} м/с, v2' = {v2_prime:.2f} м/с")
+    print(f"Коэффициент восстановления: e = {e_coef:.3f}")
+    print(f"Энергия до: {E_i:.2f} Дж, после: {E_f:.2f} Дж, потеря: {E_i - E_f:.2f} Дж")
+    
+    # Пример 3: Проверка физической реализуемости
+    mass1, mass2 = 4, 1
+    vel1, vel2 = 6, 2
+    stop_condition = 'first'
+    
+    print(f"\nПример 3 (проверка реализуемости):")
+    print(f"Массы: m1 = {mass1} кг, m2 = {mass2} кг")
+    print(f"Скорости до: v1 = {vel1} м/с, v2 = {vel2} м/с")
+    
+    v1_prime, v2_prime, e_coef = solve_collision_with_stop(mass1, mass2, vel1, vel2, stop_condition)
+    E_i, E_f = calculate_energies(mass1, mass2, vel1, vel2, v1_prime, v2_prime)
+    
+    print(f"Скорости после: v1' = {v1_prime:.2f} м/с, v2' = {v2_prime:.2f} м/с")
+    print(f"Коэффициент восстановления: e = {e_coef:.3f}")
+    if e_coef < 0 or e_coef > 1:
+        print(f"⚠️  ВНИМАНИЕ: e = {e_coef:.3f} не в диапазоне [0, 1] - физически нереализуемо!")
+    print(f"Энергия до: {E_i:.2f} Дж, после: {E_f:.2f} Дж, потеря: {E_i - E_f:.2f} Дж")
+    
+    # Построение графиков
+    print("\n" + "="*70)
+    print("Строим графики...")
+    
+    # Получаем данные с графиков
+    k_vals, E_i_vals, E_f_vals, delta_E_vals, e_vals = plot_energy_vs_mass_ratio()
+    
+    # Дополнительный анализ данных
+    print(f"\nАнализ данных с графиков:")
+    print(f"При k = 0.1: E_i = {E_i_vals[10]:.2f} Дж, E_f = {E_f_vals[10]:.2f} Дж, потеря = {delta_E_vals[10]:.2f} Дж")
+    print(f"При k = 0.5: E_i = {E_i_vals[50]:.2f} Дж, E_f = {E_f_vals[50]:.2f} Дж, потеря = {delta_E_vals[50]:.2f} Дж") 
+    print(f"При k = 1.0: E_i = {E_i_vals[99]:.2f} Дж, E_f = {E_f_vals[99]:.2f} Дж, потеря = {delta_E_vals[99]:.2f} Дж")
+
+if __name__ == "__main__":
+    main()
